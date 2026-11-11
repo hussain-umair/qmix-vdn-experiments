@@ -23,9 +23,14 @@ class Logger:
         self.sacred_info = sacred_run_dict.info
         self.use_sacred = True
 
-    def log_stat(self, key, value, t, to_sacred=True):
+    def log_stat(self, key, value, t, to_sacred=True): 
+        if hasattr(value, "detach"): 
+            value = value.detach().cpu().item() if (hasattr(value, "numel") and value.numel() == 1) else value.detach().cpu().numpy()
+        elif hasattr(value, "item"):
+            value = value.item()
+        
         self.stats[key].append((t, value))
-
+    
         if self.use_tb:
             self.tb_logger(key, value, t)
 
